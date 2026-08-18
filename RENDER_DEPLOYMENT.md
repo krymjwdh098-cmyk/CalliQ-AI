@@ -1,6 +1,6 @@
 # CalliQ-AI - Render Deployment Guide
 
-## 🚀 Deploy to Render
+## 🚀 Deploy to Render (Free Tier)
 
 ### Prerequisites
 - GitHub repository with the code (already done!)
@@ -44,23 +44,17 @@ If you prefer manual deployment:
 5. Region: Choose nearest to your users
 6. Click "Create Database"
 
-#### Deploy Redis
-1. Go to Render Dashboard → New → Redis
-2. Name: `calliq-redis`
-3. Region: Same as database
-4. Click "Create Redis"
-
 #### Deploy Backend API
 1. Go to Render Dashboard → New → Web Service
 2. Connect GitHub → Select `CalliQ-AI` repository
 3. Settings:
    - Name: `calliq-api`
    - Environment: Python 3
+   - Plan: Free
    - Build Command: `pip install -r requirements.txt`
-   - Start Command: `chmod +x Backend/start.sh && ./Backend/start.sh`
+   - Start Command: `chmod +x start.sh && ./start.sh`
 4. Environment Variables:
    - `DATABASE_URL`: (From PostgreSQL connection string)
-   - `REDIS_URL`: (From Redis connection string)
    - `SECRET_KEY`: (Generate secure key)
    - `ENVIRONMENT`: `production`
    - `DEBUG`: `false`
@@ -74,29 +68,12 @@ If you prefer manual deployment:
 2. Connect GitHub → Select `CalliQ-AI` repository
 3. Settings:
    - Name: `calliq-frontend`
+   - Plan: Free
    - Build Command: `cd frontend && npm install && npm run build`
    - Publish Directory: `frontend/dist`
 4. Environment Variables:
    - `VITE_API_URL`: `https://calliq-api.onrender.com`
 5. Click "Create Static Site"
-
-#### Deploy Celery Worker
-1. Go to Render Dashboard → New → Worker
-2. Connect GitHub → Select `CalliQ-AI` repository
-3. Settings:
-   - Name: `calliq-worker`
-   - Environment: Python 3
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `cd Backend && celery -A workers.celery_app worker --loglevel=info`
-4. Environment Variables:
-   - `DATABASE_URL`: (Same as backend)
-   - `REDIS_URL`: (Same as backend)
-   - `CELERY_BROKER_URL`: (Same as REDIS_URL)
-   - `CELERY_RESULT_BACKEND`: (Same as REDIS_URL)
-   - `SECRET_KEY`: (Same as backend)
-   - `LLM_PROVIDER`: `groq`
-   - `GROQ_API_KEY`: Your Groq API key
-5. Click "Create Worker"
 
 ### Step 4: Configure API Keys
 
@@ -140,11 +117,6 @@ Default login:
 - Check connection string format
 - Verify database user permissions
 
-### Redis connection issues
-- Ensure Redis is running
-- Check connection string format
-- Verify Redis URL format
-
 ## 📊 Monitoring
 
 ### View Logs
@@ -159,12 +131,12 @@ Default login:
 ## 💰 Cost Estimate (Render Free Tier)
 
 - PostgreSQL: Free tier available
-- Redis: ~$7/month (or use alternative)
 - Web Service: Free tier (512MB RAM)
 - Static Site: Free
-- Worker: Free tier (512MB RAM)
 
-**Estimated cost**: ~$7/month (mostly for Redis)
+**Estimated cost**: $0/month (completely free!)
+
+**Note**: This configuration uses SQLite database (file-based) instead of PostgreSQL + Redis to stay on the free tier. For production, consider upgrading to paid plans for better performance.
 
 ## 🔄 Updates
 
