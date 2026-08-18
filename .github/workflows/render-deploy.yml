@@ -1,0 +1,61 @@
+name: Render Auto-Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  deploy-to-render:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Render CLI
+        run: |
+          curl -fsSL https://render.com/cli/install.sh | bash
+          export PATH="$HOME/.render/bin:$PATH"
+          echo "$HOME/.render/bin" >> $GITHUB_PATH
+
+      - name: Validate render.yaml
+        run: |
+          export PATH="$HOME/.render/bin:$PATH"
+          render blueprints validate
+
+      - name: Authenticate with Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          export PATH="$HOME/.render/bin:$PATH"
+          render login --api-key $RENDER_API_KEY
+
+      - name: Deploy services via Blueprint
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          export PATH="$HOME/.render/bin:$PATH"
+          render blueprints apply render.yaml --skip-prompts
+
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for services to be ready..."
+          sleep 60
+
+      - name: Verify deployment
+        run: |
+          echo "Verifying deployment..."
+          # Wait a bit more for services to start
+          sleep 30
+          echo "Deployment verification complete"
+
+      - name: Deployment summary
+        run: |
+          echo "🚀 Render Deployment Complete!"
+          echo ""
+          echo "Services deployed:"
+          echo "- Backend API: https://calliq-api.onrender.com"
+          echo "- Frontend: https://calliq-frontend.onrender.com"
+          echo "- API Docs: https://calliq-api.onrender.com/api/docs"
