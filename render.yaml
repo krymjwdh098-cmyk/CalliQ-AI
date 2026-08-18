@@ -1,0 +1,102 @@
+services:
+  # Backend API Service
+  - type: web
+    name: calliq-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: chmod +x Backend/start.sh && ./Backend/start.sh
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: DATABASE_URL
+        fromDatabase:
+          name: calliq-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: calliq-redis
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: false
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: LLM_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: PARSER_PROVIDER
+        value: groq
+      - key: MATCHER_PROVIDER
+        value: groq
+      - key: CHAT_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-1.5-flash
+
+  # Frontend Static Site
+  - type: web
+    name: calliq-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://calliq-api.onrender.com
+
+  # Celery Worker for background tasks
+  - type: worker
+    name: calliq-worker
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: cd Backend && celery -A workers.celery_app worker --loglevel=info
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: DATABASE_URL
+        fromDatabase:
+          name: calliq-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: calliq-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: calliq-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: calliq-redis
+          property: connectionString
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: calliq-api
+          property: envVar
+          envVar: SECRET_KEY
+      - key: LLM_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+
+databases:
+  - name: calliq-db
+    databaseName: calliq
+    user: calliq_user
+
+  - name: calliq-redis
+    redisMaxMemoryPolicy: allkeys-lru
