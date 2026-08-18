@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: talentai_postgres
+    environment:
+      POSTGRES_USER: talentai_user
+      POSTGRES_PASSWORD: talentai_secure_password
+      POSTGRES_DB: talentai_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U talentai_user -d talentai_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: talentai_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: talentai_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.production
+    volumes:
+      - ./Backend/uploads:/app/uploads
+      - ./Backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: talentai_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Celery Worker (for background tasks)
+  celery_worker:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: talentai_celery_worker
+    env_file:
+      - .env.production
+    volumes:
+      - ./Backend/uploads:/app/uploads
+      - ./Backend:/app
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    command: celery -A workers.celery_app worker --loglevel=info
+
+  # Optional: Nginx Reverse Proxy (for production SSL)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: talentai_nginx
+  #   ports:
+  #     - "443:443"
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+  #     - ./nginx/ssl:/etc/nginx/ssl
+  #   depends_on:
+  #     - frontend
+  #     - backend
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

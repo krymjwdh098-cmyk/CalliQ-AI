@@ -1,0 +1,34 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../alembic"
+		},
+		{
+			"path": "../api"
+		},
+		{
+			"path": "../core"
+		},
+		{
+			"path": "../models"
+		},
+		{
+			"path": "../service"
+		},
+		{
+			"path": "../talentai-frontend"
+		},
+		{
+			"path": "../tests"
+		},
+		{
+			"path": "../utils"
+		},
+		{
+			"path": "../workers"
+		}
+	]
+}

@@ -1,0 +1,19 @@
+
+John Doe
+Software Engineer
+Email: john@example.com
+Phone: +1234567890
+Location: New York
+
+Experience:
+- Senior Software Engineer at Tech Corp (2020-Present)
+  * Developed Python applications
+  * Led team of 5 developers
+- Software Developer at Startup Inc (2018-2020)
+  * Built web applications using React and Node.js
+
+Education:
+- BS Computer Science, MIT (2014-2018)
+
+Skills:
+- Python, JavaScript, React, Node.js, SQL
