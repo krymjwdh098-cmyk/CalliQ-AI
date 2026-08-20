@@ -1,0 +1,19 @@
+{
+  "coverImage": "https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg",
+  "environment": {
+    "python": {
+      "version": "3.11"
+    }
+  },
+  "externalConsole": true,
+  "hiddenFiles": [
+    "^\\.git$",
+    "^\\.env$",
+    "^\\.DS_Store$"
+  ],
+  "python.analysis": {
+    "diagnosticSeverityOverrides": {
+      "reportMissingImports": "none"
+    }
+  }
+}
