@@ -51,7 +51,7 @@ jobs:
 
       - name: Deployment summary
         run: |
-          echo "🚀 Render Deployment Complete!"
+          echo " Render Deployment Complete!"
           echo ""
           echo "Services deployed:"
           echo "- Backend API: https://calliq-api.onrender.com"
