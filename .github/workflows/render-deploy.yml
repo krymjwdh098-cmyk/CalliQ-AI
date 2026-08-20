@@ -17,20 +17,17 @@ jobs:
       - name: Install Render CLI
         run: |
           curl -fsSL https://render.com/cli/install.sh | bash
-          export PATH="$HOME/.render/bin:$PATH"
           echo "$HOME/.render/bin" >> $GITHUB_PATH
 
       - name: Validate render.yaml
         run: |
-          export PATH="$HOME/.render/bin:$PATH"
-          render blueprints validate
+          $HOME/.render/bin/render blueprints validate
 
       - name: Authenticate with Render
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          export PATH="$HOME/.render/bin:$PATH"
-          render login --api-key $RENDER_API_KEY
+          $HOME/.render/bin/render login --api-key $RENDER_API_KEY
 
       - name: Deploy services via Blueprint
         env:
@@ -38,8 +35,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          export PATH="$HOME/.render/bin:$PATH"
-          render blueprints apply render.yaml --skip-prompts
+          $HOME/.render/bin/render blueprints apply render.yaml --skip-prompts
 
       - name: Wait for deployment
         run: |
